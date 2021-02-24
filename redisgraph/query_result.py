@@ -240,27 +240,22 @@ class QueryResult:
 
         return scalar
 
-    def to_table(self):
-        tbl = []
-
+    def to_str_table(self):
         header = [col[1] for col in self.header]
-        tbl.append(header) 
 
-        for row in self.result_set:
-            record = []
-            for idx, cell in enumerate(row):
-                if type(cell) is Node:
-                    record.append(cell.toString())
-                elif type(cell) is Edge:
-                    record.append(cell.toString())
-                else:
-                    record.append(cell)
-            tbl.append(record)
-        
-        if len(self.result_set) == 0:
-            tbl.append(['No data returned.'])
+        def cell_to_str(cell):
+            if type(cell) is Node:
+                return cell.toString()
+            elif type(Edge) is Edge:
+                return cell.toString()
+            else
+                return cell
 
-        return tbl 
+        return [header] + [
+            cell_to_str(cell)
+            for cell in row
+            for row in self.result_set
+        ]
 
     """Prints the data from the query response:
        1. First row result_set contains the columns names. Thus the first row in PrettyTable
@@ -271,7 +266,10 @@ class QueryResult:
 
     def pretty_print(self):
         if not self.is_empty():
-            tbl = self.to_table()
+            tbl = self.to_str_table()
+
+            if len(tbl) == 0:
+                tbl.append(['No data returned.'])
 
             pretty_tbl = PrettyTable()
             pretty_tbl.add_rows(tbl)
