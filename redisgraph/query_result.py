@@ -240,6 +240,28 @@ class QueryResult:
 
         return scalar
 
+    def to_table(self):
+        tbl = []
+
+        header = [col[1] for col in self.header]
+        tbl.append(header) 
+
+        for row in self.result_set:
+            record = []
+            for idx, cell in enumerate(row):
+                if type(cell) is Node:
+                    record.append(cell.toString())
+                elif type(cell) is Edge:
+                    record.append(cell.toString())
+                else:
+                    record.append(cell)
+            tbl.append(record)
+        
+        if len(self.result_set) == 0:
+            tbl.append(['No data returned.'])
+
+        return tbl 
+
     """Prints the data from the query response:
        1. First row result_set contains the columns names. Thus the first row in PrettyTable
           will contain the columns.
@@ -249,24 +271,12 @@ class QueryResult:
 
     def pretty_print(self):
         if not self.is_empty():
-            header = [col[1] for col in self.header]
-            tbl = PrettyTable(header)
+            tbl = self.to_table()
 
-            for row in self.result_set:
-                record = []
-                for idx, cell in enumerate(row):
-                    if type(cell) is Node:
-                        record.append(cell.toString())
-                    elif type(cell) is Edge:
-                        record.append(cell.toString())
-                    else:
-                        record.append(cell)
-                tbl.add_row(record)
+            pretty_tbl = PrettyTable()
+            pretty_tbl.add_rows(tbl)
 
-            if len(self.result_set) == 0:
-                tbl.add_row(['No data returned.'])
-
-            print(str(tbl) + '\n')
+            print(str(pretty_tbl) + '\n')
 
         for stat in self.statistics:
             print("%s %s" % (stat, self.statistics[stat]))
